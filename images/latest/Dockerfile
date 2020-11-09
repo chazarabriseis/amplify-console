@@ -24,9 +24,10 @@ RUN amazon-linux-extras enable python3.8 && \
     yum clean metadata
 
 ## Install Open JDK-11 (added by Julia)
-## following https://tecadmin.net/install-java-on-amazon-linux/
-RUN amazon-linux-extras install java-openjdk11
-
+## following https://tecadmin.net/install-java-on-amazon-linux/ did not work
+## RUN amazon-linux-extras install java-openjdk11
+## following https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/corretto-11-ug.pdf
+RUN sudo yum install java-11-amazon-corretto
 
 ## Install OS packages
 RUN touch ~/.bashrc
@@ -81,6 +82,13 @@ RUN yum -y update && \
     yum clean all && \
     rm -rf /var/cache/yum
 
+## Install gradle (added by Julia)
+## following https://linuxize.com/post/how-to-install-gradle-on-centos-7/
+RUN wget https://services.gradle.org/distributions/gradle-5.0-bin.zip -P /tmp && \
+	unzip -d /gradle /tmp/gradle-5.0-bin.zip && \
+	mv /gradle /usr/bin/gradle && \
+    rm -rf /tmp/gradle-5.0-bin.zip
+
 ## Create links for python3 and pip3
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 && \
     update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.8 11
@@ -120,12 +128,6 @@ RUN wget https://github.com/gohugoio/hugo/releases/download/v${VERSION_HUGO}/hug
     mv /hugo /usr/bin/hugo && \
     rm -rf hugo_${VERSION_HUGO}_Linux-64bit.tar.gz
 
-## Install gradle (added by Julia)
-## following https://linuxize.com/post/how-to-install-gradle-on-centos-7/
-RUN wget https://services.gradle.org/distributions/gradle-5.0-bin.zip -P /tmp && \
-	unzip -d /gradle /tmp/gradle-5.0-bin.zip && \
-	mv /gradle /usr/bin/gradle && \
-    rm -rf /tmp/gradle-5.0-bin.zip
 
 ## Installing Cypress
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && \
