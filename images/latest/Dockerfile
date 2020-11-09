@@ -25,9 +25,7 @@ RUN amazon-linux-extras enable python3.8 && \
 
 ## Install Open JDK-11 (added by Julia)
 ## following https://tecadmin.net/install-java-on-amazon-linux/ did not work
-## RUN amazon-linux-extras install java-openjdk11
-## following https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/corretto-11-ug.pdf
-RUN sudo yum install java-11-amazon-corretto
+RUN amazon-linux-extras install java-openjdk11
 
 ## Install OS packages
 RUN touch ~/.bashrc
