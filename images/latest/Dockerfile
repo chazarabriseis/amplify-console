@@ -82,10 +82,10 @@ RUN yum -y update && \
 
 ## Install gradle (added by Julia)
 ## following https://linuxize.com/post/how-to-install-gradle-on-centos-7/
-RUN wget https://services.gradle.org/distributions/gradle-5.0-bin.zip -P /tmp && \
-	unzip -d /gradle /tmp/gradle-5.0-bin.zip && \
+RUN wget https://services.gradle.org/distributions/gradle-6.7-bin.zip -P /tmp && \
+	unzip -d /gradle /tmp/gradle-6.7-bin.zip && \
 	mv /gradle /usr/bin/gradle && \
-    rm -rf /tmp/gradle-5.0-bin.zip
+    rm -rf /tmp/gradle-6.7-bin.zip
 
 ## Create links for python3 and pip3
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 && \
