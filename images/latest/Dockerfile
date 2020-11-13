@@ -1,4 +1,4 @@
-FROM amazonlinux:2
+FROM amazoncorretto:11
 MAINTAINER Amazon AWS
 
 # Framework Versions
@@ -25,7 +25,7 @@ RUN amazon-linux-extras enable python3.8 && \
 
 ## Install Open JDK-11 (added by Julia)
 ## following https://tecadmin.net/install-java-on-amazon-linux/ did not work
-RUN amazon-linux-extras install java-openjdk11
+## RUN amazon-linux-extras install java-openjdk11
 
 ## Install OS packages
 RUN touch ~/.bashrc
@@ -83,9 +83,12 @@ RUN yum -y update && \
 ## Install gradle (added by Julia)
 ## following https://linuxize.com/post/how-to-install-gradle-on-centos-7/
 RUN wget https://services.gradle.org/distributions/gradle-6.7-bin.zip -P /tmp && \
-	unzip -d /gradle /tmp/gradle-6.7-bin.zip && \
-	mv /gradle /usr/bin/gradle && \
+    unzip -d /gradle /tmp/gradle-6.7-bin.zip && \
+    mv /gradle /usr/bin/gradle && \
     rm -rf /tmp/gradle-6.7-bin.zip
+
+## add home  (added by bap)
+ENV GRADLE_HOME=/usr/bin/gradle/gradle-6.7
 
 ## Create links for python3 and pip3
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 && \
@@ -96,23 +99,24 @@ RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.s
 RUN curl -o- -L https://yarnpkg.com/install.sh > /usr/local/bin/yarn-install.sh
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && \
     nvm install $VERSION_NODE_8 && nvm use $VERSION_NODE_8 && \
-	nvm install $VERSION_NODE_10 && nvm use $VERSION_NODE_10 && \
-	npm install -g sm grunt-cli bower vuepress gatsby-cli && \
+    nvm install $VERSION_NODE_10 && nvm use $VERSION_NODE_10 && \
+    npm install -g sm grunt-cli bower vuepress gatsby-cli && \
     bash /usr/local/bin/yarn-install.sh --version $VERSION_YARN && \
-	nvm install $VERSION_NODE_12 && nvm use $VERSION_NODE_12 && \
-	npm install -g sm grunt-cli bower vuepress gatsby-cli && \
+    nvm install $VERSION_NODE_12 && nvm use $VERSION_NODE_12 && \
+    npm install -g sm grunt-cli bower vuepress gatsby-cli && \
     bash /usr/local/bin/yarn-install.sh --version $VERSION_YARN && \
-	nvm alias default node && nvm cache clear"
+    nvm alias default node && nvm cache clear"
 
 ## Install Ruby 2.4.x and 2.6.x
 RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB && \
-	curl -sL https://get.rvm.io | bash -s -- --with-gems="bundler"
+    curl -sL https://get.rvm.io | bash -s -- --with-gems="bundler"
 
-ENV PATH /usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+## add gradle to path (added by bap)
+ENV PATH /usr/bin/gradle/gradle-6.7/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN /bin/bash --login -c "\
-	rvm install $VERSION_RUBY_2_4 && rvm use $VERSION_RUBY_2_4 && gem install bundler -v $VERSION_BUNDLER && gem install jekyll && \
-	rvm install $VERSION_RUBY_2_6 && rvm use $VERSION_RUBY_2_6 && gem install bundler -v $VERSION_BUNDLER && gem install jekyll && \
-	rvm cleanup all"
+    rvm install $VERSION_RUBY_2_4 && rvm use $VERSION_RUBY_2_4 && gem install bundler -v $VERSION_BUNDLER && gem install jekyll && \
+    rvm install $VERSION_RUBY_2_6 && rvm use $VERSION_RUBY_2_6 && gem install bundler -v $VERSION_BUNDLER && gem install jekyll && \
+    rvm cleanup all"
 
 ## Install awscli
 RUN /bin/bash -c "pip3 install awscli && rm -rf /var/cache/apk/*"
@@ -135,10 +139,10 @@ RUN /bin/bash -c ". ~/.nvm/nvm.sh && \
 ## Install AWS Amplify CLI for VERSION_NODE_DEFAULT and VERSION_NODE_10
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && nvm use ${VERSION_NODE_DEFAULT} && \
     npm config set user 0 && npm config set unsafe-perm true && \
-	npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
+    npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && nvm use ${VERSION_NODE_10} && \
     npm config set user 0 && npm config set unsafe-perm true && \
-	npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
+    npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
 
 ## Environment Setup
 RUN echo export PATH="\
