@@ -1,4 +1,4 @@
-FROM amazoncorretto:11
+FROM amazonlinux:2
 MAINTAINER Amazon AWS
 
 # Framework Versions
@@ -25,7 +25,10 @@ RUN amazon-linux-extras enable python3.8 && \
 
 ## Install Open JDK-11 (added by Julia)
 ## following https://tecadmin.net/install-java-on-amazon-linux/ did not work
-## RUN amazon-linux-extras install java-openjdk11
+# RUN amazon-linux-extras install java-openjdk11
+
+## update alternative to point to new java version
+# RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10
 
 ## Install OS packages
 RUN touch ~/.bashrc
@@ -80,6 +83,15 @@ RUN yum -y update && \
     yum clean all && \
     rm -rf /var/cache/yum
 
+
+## Install java (added by Julia)
+## following https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/downloads-list.html
+RUN wget https://corretto.aws/downloads/latest/amazon-corretto-11-x64-linux-jdk.tar.gz && \
+    tar -xf amazon-corretto-11-x64-linux-jdk.tar.gz amazon-corretto-11.0.9.12.1-linux-x64 -C / && \
+    mv /amazon-corretto-11.0.9.12.1-linux-x64 /usr/bin/java && \
+    rm -rf amazon-corretto-11-x64-linux-jdk.tar.gz
+
+
 ## Install gradle (added by Julia)
 ## following https://linuxize.com/post/how-to-install-gradle-on-centos-7/
 RUN wget https://services.gradle.org/distributions/gradle-6.7-bin.zip -P /tmp && \
@@ -87,8 +99,6 @@ RUN wget https://services.gradle.org/distributions/gradle-6.7-bin.zip -P /tmp &&
     mv /gradle /usr/bin/gradle && \
     rm -rf /tmp/gradle-6.7-bin.zip
 
-## add home  (added by bap)
-ENV GRADLE_HOME=/usr/bin/gradle/gradle-6.7
 
 ## Create links for python3 and pip3
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 && \
@@ -111,8 +121,7 @@ RUN /bin/bash -c ". ~/.nvm/nvm.sh && \
 RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB && \
     curl -sL https://get.rvm.io | bash -s -- --with-gems="bundler"
 
-## add gradle to path (added by bap)
-ENV PATH /usr/bin/gradle/gradle-6.7/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV PATH /usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN /bin/bash --login -c "\
     rvm install $VERSION_RUBY_2_4 && rvm use $VERSION_RUBY_2_4 && gem install bundler -v $VERSION_BUNDLER && gem install jekyll && \
     rvm install $VERSION_RUBY_2_6 && rvm use $VERSION_RUBY_2_6 && gem install bundler -v $VERSION_BUNDLER && gem install jekyll && \
@@ -149,6 +158,8 @@ RUN echo export PATH="\
 /usr/local/rvm/gems/ruby-${VERSION_RUBY_DEFAULT}/bin:\
 /usr/local/rvm/gems/ruby-${VERSION_RUBY_DEFAULT}@global/bin:\
 /usr/local/rvm/rubies/ruby-${VERSION_RUBY_DEFAULT}/bin:\
+/usr/bin/java/bin:\
+/usr/bin/gradle/gradle-6.7/bin:\
 /usr/local/rvm/bin:\
 /root/.yarn/bin:\
 /root/.config/yarn/global/node_modules/.bin:\
